@@ -1,0 +1,166 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}"
+        },
+        {
+            "name": "base-linux",
+            "hidden": true,
+            "inherits": "base",
+            "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+        },
+        {
+            "name": "base-macos",
+            "hidden": true,
+            "inherits": "base",
+            "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+        },
+        {
+            "name": "base-windows",
+            "hidden": true,
+            "inherits": "base",
+            "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+        },
+        {
+            "name": "base-mingw",
+            "hidden": true,
+            "inherits": "base",
+            "condition": { "type": "inList", "string": "${hostSystemName}", "list": ["Windows", "Linux"] }
+        },
+        {
+            "name": "linux-x64-gcc",
+            "inherits": "base-linux",
+            "displayName": "Linux x64 (GCC)",
+            "description": "GCC for x64 Linux: native on x64 hardware; on an ARM64 machine a cross build with x86_64-linux-gnu-g++",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/linux-x64-gcc.cmake"
+        },
+        {
+            "name": "linux-x64-clang",
+            "inherits": "base-linux",
+            "displayName": "Linux x64 (Clang)",
+            "description": "Clang for x64 Linux: native on x64 hardware; on an ARM64 machine a cross build (clang++ --target=x86_64-linux-gnu)",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/linux-x64-clang.cmake"
+        },
+        {
+            "name": "linux-arm64-gcc",
+            "inherits": "base-linux",
+            "displayName": "Linux ARM64 (GCC)",
+            "description": "GCC for ARM64 (aarch64) Linux: native on ARM64 hardware, otherwise a cross build with aarch64-linux-gnu-g++ (Debian/Ubuntu: apt install g++-aarch64-linux-gnu; qemu-user, if installed, lets ctest run the result)",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/linux-arm64-gcc.cmake"
+        },
+        {
+            "name": "linux-arm64-clang",
+            "inherits": "base-linux",
+            "displayName": "Linux ARM64 (Clang)",
+            "description": "Clang for ARM64 (aarch64) Linux: native on ARM64 hardware, otherwise a cross build (clang++ --target=aarch64-linux-gnu; needs the aarch64 GCC cross package for its libraries, or -DCMAKE_SYSROOT)",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/linux-arm64-clang.cmake"
+        },
+        {
+            "name": "linux-arm32-gcc",
+            "inherits": "base-linux",
+            "displayName": "Linux ARM32 (GCC)",
+            "description": "GCC for 32-bit ARM (armhf) Linux: native on 32-bit ARM hardware, otherwise a cross build with arm-linux-gnueabihf-g++ (Debian/Ubuntu: apt install g++-arm-linux-gnueabihf). A 32-bit ARM userland on 64-bit ARM hardware should pass -DCMAKE_CXX_COMPILER=g++ -- see breeze/cmake/toolchains/_common.cmake",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/linux-arm32-gcc.cmake"
+        },
+        {
+            "name": "linux-arm32-clang",
+            "inherits": "base-linux",
+            "displayName": "Linux ARM32 (Clang)",
+            "description": "Clang for 32-bit ARM (armhf) Linux: native on 32-bit ARM hardware, otherwise a cross build (clang++ --target=<the triple the cross g++ was built for, normally arm-linux-gnueabihf>) -- see linux-arm32-gcc",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/linux-arm32-clang.cmake"
+        },
+        {
+            "name": "macos-arm64-clang",
+            "inherits": "base-macos",
+            "displayName": "macOS ARM64 (Clang)",
+            "description": "Clang for Apple Silicon macOS -- Apple Clang from the Xcode Command Line Tools (xcode-select --install), or LLVM's own with -DCMAKE_CXX_COMPILER. The architecture is pinned with CMAKE_OSX_ARCHITECTURES, so this means arm64 even under a Rosetta-translated cmake; minimum macOS 11.0",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/macos-arm64-clang.cmake"
+        },
+        {
+            "name": "macos-x64-clang",
+            "inherits": "base-macos",
+            "displayName": "macOS x64 (Clang)",
+            "description": "Clang for Intel macOS -- Apple Clang from the Xcode Command Line Tools, or LLVM's own with -DCMAKE_CXX_COMPILER. Pinned to x86_64 with CMAKE_OSX_ARCHITECTURES, so on an Apple Silicon Mac it builds x64 code that runs through Rosetta 2; minimum macOS 11.0",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/macos-x64-clang.cmake"
+        },
+        {
+            "name": "windows-x64-msvc",
+            "inherits": "base-windows",
+            "displayName": "Windows x64 (MSVC)",
+            "description": "cl.exe for x64: run from an x64 Native Tools Command Prompt for VS -- cl.exe's architecture comes from that developer environment, not from CMake",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/windows-x64-msvc.cmake"
+        },
+        {
+            "name": "windows-arm64-msvc",
+            "inherits": "base-windows",
+            "displayName": "Windows ARM64 (MSVC)",
+            "description": "cl.exe for ARM64: run from a Visual Studio Developer Prompt configured for ARM64 (an ARM64 Native Tools prompt, or x64_arm64 via vcvarsall.bat to cross-build from an x64 host) -- cl.exe's architecture comes from that environment, not from CMake",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/windows-arm64-msvc.cmake"
+        },
+        {
+            "name": "windows-x64-clang-cl",
+            "inherits": "base-windows",
+            "displayName": "Windows x64 (clang-cl)",
+            "description": "clang-cl (Clang with the MSVC ABI), pinned to --target=x86_64-pc-windows-msvc so it means x64 whatever the machine's own architecture is",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/windows-x64-clang-cl.cmake"
+        },
+        {
+            "name": "windows-arm64-clang-cl",
+            "inherits": "base-windows",
+            "displayName": "Windows ARM64 (clang-cl)",
+            "description": "clang-cl (Clang with the MSVC ABI), pinned to --target=aarch64-pc-windows-msvc so it means ARM64 whatever the machine's own architecture is",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/windows-arm64-clang-cl.cmake"
+        },
+        {
+            "name": "windows-x64-clang",
+            "inherits": "base-windows",
+            "displayName": "Windows x64 (Clang, GNU-style)",
+            "description": "Clang with its own GNU-style driver, e.g. from an MSYS2 CLANG64 shell -- assumes that environment's clang++ is what's on PATH, distinct from clang-cl above",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/windows-x64-clang.cmake"
+        },
+        {
+            "name": "windows-arm64-clang",
+            "inherits": "base-windows",
+            "displayName": "Windows ARM64 (Clang, GNU-style)",
+            "description": "Clang with its own GNU-style driver, e.g. from an MSYS2 CLANGARM64 shell -- assumes that environment's clang++ is what's on PATH",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/windows-arm64-clang.cmake"
+        },
+        {
+            "name": "windows-x86-mingw32",
+            "inherits": "base-mingw",
+            "displayName": "Windows x86 (MinGW32)",
+            "description": "32-bit MinGW g++: i686-w64-mingw32-g++ from an MSYS2 MINGW32 shell on Windows, or a cross build from Linux (apt install g++-mingw-w64-i686; wine, if installed, lets ctest run the result)",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/windows-x86-mingw32.cmake"
+        },
+        {
+            "name": "windows-x64-mingw64",
+            "inherits": "base-mingw",
+            "displayName": "Windows x64 (MinGW-w64)",
+            "description": "64-bit MinGW-w64 g++: x86_64-w64-mingw32-g++ from an MSYS2 MINGW64 shell on Windows, or a cross build from Linux (apt install g++-mingw-w64-x86-64; wine, if installed, lets ctest run the result)",
+            "toolchainFile": "${sourceDir}/breeze/cmake/toolchains/windows-x64-mingw64.cmake"
+        }
+    ],
+    "buildPresets": [
+        { "name": "linux-x64-gcc", "configurePreset": "linux-x64-gcc" },
+        { "name": "linux-x64-clang", "configurePreset": "linux-x64-clang" },
+        { "name": "linux-arm64-gcc", "configurePreset": "linux-arm64-gcc" },
+        { "name": "linux-arm64-clang", "configurePreset": "linux-arm64-clang" },
+        { "name": "linux-arm32-gcc", "configurePreset": "linux-arm32-gcc" },
+        { "name": "linux-arm32-clang", "configurePreset": "linux-arm32-clang" },
+        { "name": "macos-arm64-clang", "configurePreset": "macos-arm64-clang" },
+        { "name": "macos-x64-clang", "configurePreset": "macos-x64-clang" },
+        { "name": "windows-x64-msvc", "configurePreset": "windows-x64-msvc" },
+        { "name": "windows-arm64-msvc", "configurePreset": "windows-arm64-msvc" },
+        { "name": "windows-x64-clang-cl", "configurePreset": "windows-x64-clang-cl" },
+        { "name": "windows-arm64-clang-cl", "configurePreset": "windows-arm64-clang-cl" },
+        { "name": "windows-x64-clang", "configurePreset": "windows-x64-clang" },
+        { "name": "windows-arm64-clang", "configurePreset": "windows-arm64-clang" },
+        { "name": "windows-x86-mingw32", "configurePreset": "windows-x86-mingw32" },
+        { "name": "windows-x64-mingw64", "configurePreset": "windows-x64-mingw64" }
+    ]
+}

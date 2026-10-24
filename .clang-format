@@ -1,0 +1,117 @@
+---
+# .clang-format
+# Enforces the formatting rules from the C/C++ Coding Style Guide (Part I: C++ Style).
+# Applies equally to Part II C API files per §15 (Indentation and Braces) — same
+# tabs/Allman/line-length rules, just different naming (naming can't be enforced
+# by clang-format; see .clang-tidy).
+Language: Cpp
+Standard: Latest
+
+# --- Indentation (style guide §2) ---
+UseTab: Always
+TabWidth: 4
+IndentWidth: 4
+ContinuationIndentWidth: 4
+IndentCaseLabels: true
+IndentPPDirectives: None
+IndentExternBlock: Indent
+
+# Access specifiers (public:/private:) sit unindented, flush with the class
+# keyword — only members are indented one level, matching every example in §1/§6.
+AccessModifierOffset: -4
+
+# Namespace bodies are indented like any other block (style guide §Namespaces).
+NamespaceIndentation: All
+
+# --- Braces: Allman style everywhere (style guide §3) ---
+BreakBeforeBraces: Allman
+Cpp11BracedListStyle: true
+# InlineOnly (not Empty or None): out-of-class function definitions always
+# get full Allman expansion regardless of length, same as before -- this
+# only additionally allows a function *defined inside a class body* to
+# stay a compact one-liner if it's short enough to fit. That's specifically
+# for the trivial-one-liner exception to "avoid inline member definitions"
+# in Class Member Organization (style guide §6) -- a plain getter like
+# `int getValue() const { return m_value; }` stays inline-and-compact;
+# anything defined out-of-class still always gets the full brace expansion.
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortEnumsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+
+# No trailing "// namespace X" / "// class X" comments on closing braces
+# (style guide §Namespaces / §6).
+FixNamespaceComments: false
+
+# --- Pointers and references attach to the type (style guide §4) ---
+PointerAlignment: Left
+ReferenceAlignment: Pointer
+DerivePointerAlignment: false
+
+# --- Line length (style guide §8) ---
+ColumnLimit: 100
+
+# --- Spacing (style guide §5) ---
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpacesInAngles: false
+
+# --- Include ordering (style guide §7: main header, C headers, C++ std,
+# third-party, project headers) ---
+SortIncludes: true
+SortUsingDeclarations: true
+IncludeBlocks: Regroup
+IncludeIsMainRegex: '(Test)?$'
+IncludeCategories:
+  # 1. Corresponding header is auto-detected and always sorted first.
+  # 2. C system headers wrapped for C++ (<cstdio>, <cstdint>, ...).
+  - Regex: '^<(cassert|cctype|cerrno|cfenv|cfloat|cinttypes|climits|clocale|cmath|csetjmp|csignal|cstdarg|cstddef|cstdint|cstdio|cstdlib|cstring|ctime|cuchar|cwchar|cwctype)>$'
+    Priority: 1
+    CaseSensitive: true
+  # 3. C++ standard library headers (no dot, no slash — <vector>, <memory>, ...).
+  - Regex: '^<[a-z_]+>$'
+    Priority: 2
+    CaseSensitive: true
+  # 4. Third-party / external library headers (<fmt/format.h>, <boost/...>, ...).
+  - Regex: '^<.*>$'
+    Priority: 3
+    CaseSensitive: true
+  # 5. Project headers, quoted ("NetworkManager.hpp", ...).
+  - Regex: '^".*"$'
+    Priority: 4
+    CaseSensitive: true
+
+# --- Misc ---
+AlignTrailingComments: true
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+
+# Parameters/arguments: never one-per-line (style guide §8). When a
+# signature/call doesn't fit on one line, keep everything together on a
+# single continuation line if it fits there (AllowAll...OnNextLine), and
+# fall back to packing multiple per line (BinPack...) rather than ever
+# breaking to one per line. This can't force a genuinely long signature
+# to fit within ColumnLimit without wrapping at all -- doing that would
+# require ColumnLimit: 0 project-wide, which would also stop comments and
+# ordinary expressions from ever wrapping. See §8 for the full rule.
+#
+# COMPATIBILITY NOTE: clang-format 20 changed BinPackParameters (and the
+# equivalent for call arguments) from a boolean to an enum, and later
+# versions deprecated it again in favor of a nested PackParameters/
+# PackArguments option. The boolean form below is correct for clang-format
+# through 19 (still the most common version in practice, e.g. Ubuntu
+# 24.04 LTS ships 18). On clang-format 20 or newer, replace `true` with
+# `BinPack` on both lines if you find these are being silently ignored.
+BinPackArguments: true
+BinPackParameters: true
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerIndentWidth: 4
+PenaltyReturnTypeOnItsOwnLine: 1000
